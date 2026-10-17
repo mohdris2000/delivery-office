@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
+// Cairo يغطي العربية واللاتينية، ونعطيه اسم --font-sans الذي تعتمد عليه المكوّنات
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
-  variable: "--font-cairo",
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -17,12 +19,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ar" dir="rtl">
-      <body
-        className={`${cairo.variable} font-sans antialiased bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100`}
-      >
-        {children}
-      </body>
+    <html lang="ar" dir="rtl" className={cn("font-sans", cairo.variable)}>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
