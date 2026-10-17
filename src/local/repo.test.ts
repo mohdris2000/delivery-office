@@ -171,4 +171,21 @@ describe("الطلبيات", () => {
       code: "NOT_FOUND",
     });
   });
+
+  it("يسمح بإنشاء طلبية عمولتها مغلقة ويقفلها", async () => {
+    const driver = await newDriver();
+    const order = await createOrder({
+      date: "2026-10-17",
+      driverId: driver.id,
+      amount: 1500,
+      commissionClosed: true,
+    });
+
+    expect(order.commissionClosed).toBe(true);
+    await expect(updateOrder(order.id, { amount: 2000 })).rejects.toMatchObject(
+      {
+        code: "ORDER_LOCKED",
+      },
+    );
+  });
 });

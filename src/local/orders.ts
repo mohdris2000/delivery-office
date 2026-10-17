@@ -19,6 +19,8 @@ export interface OrderInput {
   fareReceived?: boolean;
   /** عمولة يدوية. إن غابت تُحسب تلقائيًا بالنسبة المحفوظة. */
   commissionAmount?: Agorot;
+  /** عمولة مغلقة منذ البداية (استيراد أو إغلاق يدوي بدون تسوية). */
+  commissionClosed?: boolean;
 }
 
 export type OrderPatch = Partial<OrderInput>;
@@ -91,7 +93,7 @@ export async function createOrder(input: OrderInput): Promise<Order> {
       commissionAmount,
       // تعديل يدوي فقط إذا اختلفت عن الحساب التلقائي
       commissionOverridden: commissionAmount !== automatic,
-      commissionClosed: false,
+      commissionClosed: input.commissionClosed ?? false,
       settlementId: null,
       version: 0,
       updatedAt: nowISO(),
@@ -104,7 +106,10 @@ export async function createOrder(input: OrderInput): Promise<Order> {
   });
 }
 
-export async function updateOrder(id: string, patch: OrderPatch): Promise<Order> {
+export async function updateOrder(
+  id: string,
+  patch: OrderPatch,
+): Promise<Order> {
   return db.transaction("rw", db.drivers, db.orders, db.outbox, async () => {
     const existing = await requireOrder(id);
     const next: Order = { ...existing };

@@ -15,3 +15,6 @@ export class DomainError extends Error {
     this.code = code;
   }
 }
+export function errorMessage(error: unknown): string {
+  return error instanceof DomainError ? error.message : "حدث خطأ غير متوقع";
+}

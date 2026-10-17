@@ -1,8 +1,8 @@
+import type { Metadata } from "next";
+import { OrdersView } from "@/features/orders/orders-view";
+
+export const metadata: Metadata = { title: "الطلبيات | مكتب الدليفري" };
+
 export default function OrdersPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold">الطلبيات</h1>
-      <p className="mt-2 text-muted-foreground">قريبًا.</p>
-    </div>
-  );
+  return <OrdersView />;
 }
