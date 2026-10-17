@@ -7,8 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum SettlementStatus {
+  ACTIVE
+  CANCELLED
+}
+
 model Driver {
-  // يُنشأ المعرّف على الجهاز (UUID)، ولا نضع default هنا عمدًا
   id           String   @id @db.Uuid
   name         String   @unique
   address      String
@@ -17,13 +21,79 @@ model Driver {
   walletType   String?  @map("wallet_type")
   isActive     Boolean  @default(true) @map("is_active")
 
-  // حقول المزامنة
   version         Int       @default(1)
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
   createdByDevice String?   @map("created_by_device")
 
+  orders      Order[]
+  settlements Settlement[]
+
   @@index([updatedAt])
   @@map("drivers")
+}
+
+model Order {
+  id       String   @id @db.Uuid
+  date     DateTime @db.Date
+  driverId String   @map("driver_id") @db.Uuid
+  details  String?
+  notes    String?
+
+  // كل المبالغ بالأغورة (15.00 ₪ = 1500)
+  amount Int
+
+  // أجرة الطلبية من الزبون
+  fareReceived Boolean @default(true) @map("fare_received")
+
+  // نسبة العمولة بالنقاط الأساسية (basis points): 20% = 2000
+  commissionRateBp     Int     @map("commission_rate_bp")
+  commissionAmount     Int     @map("commission_amount")
+  commissionOverridden Boolean @default(false) @map("commission_overridden")
+  commissionClosed     Boolean @default(false) @map("commission_closed")
+
+  settlementId String? @map("settlement_id") @db.Uuid
+
+  version         Int       @default(1)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
+  createdByDevice String?   @map("created_by_device")
+
+  driver     Driver      @relation(fields: [driverId], references: [id], onDelete: Restrict)
+  settlement Settlement? @relation(fields: [settlementId], references: [id], onDelete: Restrict)
+
+  @@index([driverId, date])
+  @@index([date])
+  @@index([settlementId])
+  @@index([updatedAt])
+  @@map("orders")
+}
+
+model Settlement {
+  id       String   @id @db.Uuid
+  driverId String   @map("driver_id") @db.Uuid
+  date     DateTime @db.Date
+
+  // بالأغورة
+  closedTotal  Int @map("closed_total")
+  offsetAmount Int @default(0) @map("offset_amount")
+  paidAmount   Int @map("paid_amount")
+
+  notes  String?
+  status SettlementStatus @default(ACTIVE)
+
+  version         Int       @default(1)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
+  createdByDevice String?   @map("created_by_device")
+
+  driver Driver  @relation(fields: [driverId], references: [id], onDelete: Restrict)
+  orders Order[]
+
+  @@index([driverId, date])
+  @@index([updatedAt])
+  @@map("settlements")
 }

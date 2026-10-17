@@ -8,8 +8,17 @@ async function main() {
   });
   const prisma = new PrismaClient({ adapter });
   try {
-    const count = await prisma.driver.count();
-    console.log("OK - drivers count:", count);
+    const [drivers, orders, settlements] = await Promise.all([
+      prisma.driver.count(),
+      prisma.order.count(),
+      prisma.settlement.count(),
+    ]);
+    console.log(
+      "OK - drivers/orders/settlements:",
+      drivers,
+      orders,
+      settlements,
+    );
   } finally {
     await prisma.$disconnect();
   }
