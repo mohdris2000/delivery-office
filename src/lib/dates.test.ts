@@ -5,6 +5,7 @@ import {
   isoFromDbDate,
   startOfWeek,
   toISODate,
+  isValidISODate
 } from "./dates";
 
 describe("startOfWeek (الأسبوع يبدأ من السبت)", () => {
@@ -39,5 +40,14 @@ describe("toISODate", () => {
 describe("التحويل من/إلى عمود @db.Date", () => {
   it("لا يتغير اليوم عند الذهاب والعودة", () => {
     expect(isoFromDbDate(dbDateFromISO("2026-08-24"))).toBe("2026-08-24");
+  });
+});
+
+describe("isValidISODate", () => {
+  it("يقبل التواريخ الحقيقية فقط", () => {
+    expect(isValidISODate("2026-10-17")).toBe(true);
+    expect(isValidISODate("2026-02-30")).toBe(false);
+    expect(isValidISODate("17-10-2026")).toBe(false);
+    expect(isValidISODate("")).toBe(false);
   });
 });

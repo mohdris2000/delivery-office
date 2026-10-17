@@ -49,3 +49,9 @@ export function isoFromDbDate(date: Date): ISODate {
 export function dbDateFromISO(iso: ISODate): Date {
   return new Date(`${iso}T00:00:00.000Z`);
 }
+
+/** يتحقق أن النص تاريخ حقيقي بصيغة YYYY-MM-DD (يرفض مثل 2026-02-30). */
+export function isValidISODate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  return toISODate(parseISODate(value)) === value;
+}
