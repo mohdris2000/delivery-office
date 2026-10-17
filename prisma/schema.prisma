@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Driver {
+  // يُنشأ المعرّف على الجهاز (UUID)، ولا نضع default هنا عمدًا
+  id           String   @id @db.Uuid
+  name         String   @unique
+  address      String
+  phones       String[] @default([])
+  walletNumber String?  @map("wallet_number")
+  walletType   String?  @map("wallet_type")
+  isActive     Boolean  @default(true) @map("is_active")
+
+  // حقول المزامنة
+  version         Int       @default(1)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
+  createdByDevice String?   @map("created_by_device")
+
+  @@index([updatedAt])
+  @@map("drivers")
+}
